@@ -1,0 +1,2 @@
+Please ensure drainer pod is running:
+$ watch kubectl get po -n {{ .Release.Namespace }} -l app={{ .Values.name }}

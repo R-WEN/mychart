@@ -1,0 +1,22 @@
+# Default values for lightning.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# tikv importer values
+importer:
+  name: tikv-importer
+  image: uhub.ucloud.cn/pingcap/lightning:latest
+  # the k8s node name of the tikv importer pod
+  nodeName: kube-node-1
+  # importer data directory
+  hostPath: /mnt/tikv-importer
+  # the service port of tikv importer
+  servicePort: 20160
+  # tikv importer pod's resources
+  resources:
+    limits:
+      cpu: 32000m
+      memory: 32Gi
+    requests:
+      cpu: 32000m
+      memory: 32Gi

@@ -1,0 +1,131 @@
+clusterName: demo-cluster
+
+nodeSelectorRequired: false
+
+# kafkaAddrs must be valid kafka cluster address list if binlog is enabled
+kafkaAddrs: kafka-0.kafka-svc.default.svc.cluster.local:9092
+# zookeeperAddrs must be valid zookeeper address list if binlog is enabled and kafkaAddrs is empty
+zookeeperAddrs: zk-0.zk-svc.default.svc.cluster.local:2181
+
+# pushgatewayImage is used for sidecar container of tikv
+pushgatewayImage: prom/pushgateway:v0.3.1
+
+# configMap is used to config tidb cluster
+configMap: tidb-cluster-config
+
+# services is the service list to expose, default is ClusterIP
+# can be ClusterIP | NodePort | LoadBalancer
+services:
+  - name: pd
+    type: ClusterIP
+  - name: tidb
+    type: NodePort
+  - name: prometheus
+    type: NodePort
+  - name: grafana
+    type: NodePort
+  - name: privileged-tidb
+    type: ClusterIP
+
+pd:
+  size: 3
+  image: uhub.ucloud.cn/pingcap/pd:v2.0.4
+  logLevel: info
+  # maxStoreDownTime is how long a store will be considered `down` when disconnected
+  # if a store is considered `down`, the regions will be migrated to other stores
+  maxStoreDownTime: 1h
+  # maxReplicas is the number of replicas for each region
+  maxReplicas: 3
+  resources: {}
+    # limits:
+    #   cpu: 8000m
+    #   memory: 8Gi
+    # requests:
+    #   cpu: 4000m
+    #   memory: 4Gi
+    #   storage: 1Gi
+  # nodeSelector is used for scheduling pod,
+  # if nodeSelectorRequired is true, all the following labels must be matched
+  nodeSelector: {}
+    # kind: pd
+    # # zone is comma separated availability zone list
+    # zone: cn-bj1-01,cn-bj1-02
+    # # region is comma separated region list
+    # region: cn-bj1
+
+tidb:
+  size: 2
+  image: uhub.ucloud.cn/pingcap/tidb:v2.0.4
+  logLevel: info
+  resources: {}
+    # limits:
+    #   cpu: 16000m
+    #   memory: 16Gi
+    # requests:
+    #   cpu: 12000m
+    #   memory: 12Gi
+  nodeSelector: {}
+    # kind: tidb
+    # zone: cn-bj1-01,cn-bj1-02
+    # region: cn-bj1
+  # binlog is tidb-binlog, if non-empty and either kafkaAddrs or zookeeperAddrs is provided
+  # tidb binlog will be pushed to the specified kafka cluster
+  binlog: {}
+    # image: pingcap/tidb-binlog:latest
+    # resources:
+    #   limits:
+    #     cpu: 8000m
+    #     memory: 8Gi
+    #   requests:
+    #     cpu: 4000m
+    #     memory: 4Gi
+
+tikv:
+  size: 3
+  image: uhub.ucloud.cn/pingcap/tikv:v2.0.4
+  # syncLog is a bool value to enable or disable syc-log for raftstore, default is true
+  # enable this can prevent data loss when power failure
+  syncLog: true
+  logLevel: info
+  resources: {}
+    # limits:
+    #   cpu: 16000m
+    #   memory: 32Gi
+    #   storage: 300Gi
+    # requests:
+    #   cpu: 12000m
+    #   memory: 24Gi
+    #   storage: 300Gi
+  nodeSelector: {}
+    # kind: tikv
+    # zone: cn-bj1-01,cn-bj1-02
+    # region: cn-bj1
+
+monitor:
+  prometheus:
+    image: prom/prometheus:v2.0.0
+    retentionDays: 15
+  grafana:
+    image: grafana/grafana:4.2.0
+  dashboardInstaller:
+    image: pingcap/tidb-dashboard-installer:v1.0.7
+
+# privilegedTidb is used on cloud for admin maintainance
+# without password, like reset password, backup database etc
+privilegedTidb:
+  size: 1
+  image: uhub.ucloud.cn/pingcap/tidb:v2.0.4
+
+# alertmanagerURL is used to set alertmanager url for prometheus, eg: 127.0.0.1:9093
+# alertmanagerURL: ""
+
+# NOTE: DO NOT change this two variables, they're needed to avoid template conflict between prometheus and chart
+metaInstance: "{{ $labels.instance }}"
+metaType: "{{ $labels.type }}"
+metaValue: "{{ $value }}"
+
+secrets:
+    grafanaUsername: admin
+    grafanaPassword: admin
+# NOTE: grafanaUrl is the full public facing url of grafana you use in browser
+grafanaUrl: http://localhost:3000

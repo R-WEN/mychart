@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.lightning.name }}
+spec:
+  nodeName: {{ .Values.lightning.nodeName }}
+  containers:
+  - command:
+    - /bin/tidb-lightning
+    - -c
+    - /etc/tidb-lightning.toml
+    image: {{ .Values.lightning.image }}
+    name: {{ .Values.lightning.name }}
+    resources:
+{{ toYaml .Values.lightning.resources | indent 6 }}
+    volumeMounts:
+      - name: timezone
+        mountPath: /etc/localtime
+      - name: config
+        mountPath: /etc
+      {{- if .Values.lightning.testMode }}
+      {{- else }}
+      - name: lightning
+        mountPath: /var/lib/lightning/data
+      {{- end }}
+  restartPolicy: Never
+  volumes:
+  - name: timezone
+    hostPath:
+      path: /etc/localtime
+  - name: config
+    configMap:
+      name: {{ .Values.lightning.name }}
+  {{- if .Values.lightning.testMode }}
+  {{- else }}
+  - name: lightning
+    hostPath:
+      path: {{ .Values.lightning.hostPath }}
+  {{- end }}

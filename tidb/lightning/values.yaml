@@ -1,0 +1,37 @@
+# Default values for lightning.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# tidb lightning values
+lightning:
+  name: tidb-lightning
+  image: uhub.ucloud.cn/pingcap/lightning:latest
+  # the k8s node name of the tidb lightning pod
+  nodeName: kube-node-1
+  # mydumper data directory
+  hostPath: /mnt/tidb-mydumper
+  testMode: false
+  # tidb lightning pod's resources
+  resources:
+    limits:
+      cpu: 32000m
+      memory: 32Gi
+    requests:
+      cpu: 32000m
+      memory: 16Gi
+
+# tikv importer values
+importer:
+  name: tikv-importer
+  servicePort: 20160
+
+# tidb cluster values
+tidb:
+  # configuration for tidb(pick one of them if has many tidb servers) and pd server.
+  mysql:
+    host: localhost
+    port: 4000
+    user: root
+    password:
+  # pd addresses
+  pdAddr: pd-addr:2379

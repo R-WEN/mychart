@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.importer.name }}
+  labels:
+    app: {{ .Values.importer.name }}
+spec:
+  ports:
+  - port: {{ .Values.importer.servicePort }}
+    protocol: TCP
+  selector:
+    app: {{ .Values.importer.name }}

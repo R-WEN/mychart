@@ -1,0 +1,54 @@
+{{- if .Values.volumeManager }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: tidb-volume-manager
+  labels:
+    app: tidb-operator
+spec:
+  selector:
+    matchLabels:
+      app: tidb-operator
+      name: tidb-volume-manager
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+  template:
+    metadata:
+      labels:
+        app: tidb-operator
+        name: tidb-volume-manager
+    spec:
+    {{- if .Values.rbac.create }}
+      serviceAccount: tidb-volume-manager
+    {{- end }}
+      containers:
+      - name: tidb-volume-manager
+        image: {{ .Values.operatorImage }}
+        resources:
+{{ toYaml .Values.volumeManager.resources | indent 12 }}
+        command:
+          - /usr/local/bin/tidb-volume-manager
+          - --pvdir={{ .Values.volumeManager.pvDir }}
+          - --review-enabled={{ .Values.reviewEnabled }}
+          - --v={{ .Values.volumeManager.logLevel }}
+        volumeMounts:
+          - name: tidb
+            mountPath: {{ .Values.volumeManager.pvDir }}
+          - name: timezone
+            mountPath: /etc/localtime
+        env:
+        - name: MY_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      volumes:
+      - name: tidb
+        hostPath:
+          path: {{ .Values.volumeManager.pvDir }}
+      - name: timezone
+        hostPath:
+          path: /etc/localtime
+{{- end }}

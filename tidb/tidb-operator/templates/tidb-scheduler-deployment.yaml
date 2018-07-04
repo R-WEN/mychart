@@ -1,0 +1,80 @@
+{{- $defaultHyperkubeImage := "quay.io/coreos/hyperkube:v1.7.2_coreos.0" -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: tidb-scheduler
+  labels:
+    app: tidb-operator
+spec:
+  replicas: {{ .Values.scheduler.replicas }}
+  selector:
+    matchLabels:
+      app: tidb-operator
+      name: tidb-scheduler
+  template:
+    metadata:
+      labels:
+        app: tidb-operator
+        name: tidb-scheduler
+    spec:
+    {{- if .Values.rbac.create }}
+      serviceAccount: tidb-scheduler
+    {{- end }}
+      containers:
+      - name: tidb-scheduler
+        image: {{ .Values.operatorImage }}
+        resources:
+{{ toYaml .Values.scheduler.resources | indent 12 }}
+        command:
+          - /usr/local/bin/tidb-scheduler
+          - --L={{ .Values.scheduler.logLevel }}
+          - --port=10262
+        env:
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        volumeMounts:
+          - name: timezone
+            mountPath: /etc/localtime
+      - name: kube-scheduler
+      {{- if .Values.kubeScheduler.kubeSchedulerImage }}
+        image: {{ .Values.kubeScheduler.kubeSchedulerImage }}
+      {{- else if .Values.kubeScheduler.hyperkubeImage }}
+        image: {{ .Values.kubeScheduler.hyperkubeImage }}
+      {{- else }}
+        image: {{ $defaultHyperkubeImage }}
+      {{- end }}
+        resources:
+{{ toYaml .Values.kubeScheduler.resources | indent 12 }}
+        command:
+      {{- if .Values.kubeScheduler.kubeSchedulerImage }}
+        - kube-scheduler
+      {{- else }}
+        - /hyperkube
+        - scheduler
+      {{- end }}
+        - --port=10261
+        - --leader-elect=true
+        - --lock-object-name=tidb-scheduler
+        - --lock-object-namespace={{ .Release.Namespace }}
+        - --scheduler-name=tidb-scheduler
+        - --v={{ .Values.kubeScheduler.logLevel }}
+        - --policy-configmap=tidb-scheduler-policy
+        - --policy-configmap-namespace={{ .Release.Namespace }}
+        # TODO: find the reason why health-check failed and uncomment following lines
+        # livenessProbe:
+        #   httpGet:
+        #     host: 127.0.0.1
+        #     path: /healthz
+        #     port: 10261
+        #   initialDelaySeconds: 30
+        #   timeoutSeconds: 10
+        volumeMounts:
+          - name: timezone
+            mountPath: /etc/localtime
+      volumes:
+      - name: timezone
+        hostPath:
+          path: /etc/localtime

@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Deploy TiKV importer, a data importer for TiKV
+name: tikv-importer
+version: 0.1.0

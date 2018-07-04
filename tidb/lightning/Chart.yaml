@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Deploy TiDB lightning, a high-speed data import tool for TiDB
+name: tidb-lightning
+version: 0.1.0

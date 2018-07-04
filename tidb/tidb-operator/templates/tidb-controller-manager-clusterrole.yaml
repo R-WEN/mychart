@@ -1,0 +1,37 @@
+{{- if .Values.rbac.create }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Release.Namespace }}:tidb-controller-manager
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get","list"]
+- apiGroups: [""]
+  resources:
+    - pods
+    - services
+    - serviceaccounts
+    - configmaps
+    - persistentvolumeclaims
+    - persistentvolumes
+  verbs: ["*"]
+- apiGroups: ["apps", "extensions"]
+  resources: ["deployments"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["jobs","cronjobs"]
+  verbs: ["get", "list", "create", "delete","update"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "get", "delete"]
+- apiGroups: [""]
+  resources: ["endpoints"]
+  verbs: ["create", "get", "update"]
+- apiGroups: ["pingcap.com"]
+  resources: ["tidbclusters", "tidbsets", "tidbclusterbackups", "tidbreviews"]
+  verbs: ["*"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
+  verbs: ["get", "create", "list", "delete"]
+{{- end }}

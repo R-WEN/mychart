@@ -1,0 +1,56 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}
+  labels:
+    app: {{ .Values.name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      nodeName: {{ .Values.nodeName }}
+      containers:
+      - name: drainer
+        image: {{ .Values.image }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        command:
+          - /drainer
+          - -L=debug
+          - -config=/var/lib/drainer/config/drainer.toml
+          - -addr=$(MY_POD_IP):8249
+          - -initial-commit-ts={{ .Values.commitTS }}
+        env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        volumeMounts:
+          - name: timezone
+            mountPath: /etc/localtime
+          - name: config
+            mountPath: /var/lib/drainer/config
+        {{- if .Values.pb }}
+          - name: drainer
+            mountPath: /var/lib/drainer/data
+        {{- end }}
+      volumes:
+      - name: timezone
+        hostPath:
+          path: /etc/localtime
+      - name: config
+        configMap:
+          name: {{ .Values.name }}
+    {{- if .Values.pb }}
+      - name: drainer
+        hostPath:
+          path: {{ .Values.pb.hostPath }}
+    {{- end }}
+

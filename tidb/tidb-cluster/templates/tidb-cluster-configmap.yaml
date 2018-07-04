@@ -1,0 +1,1786 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.configMap }}
+data:
+  pump-config: |-
+    # pump Configuration.
+
+    # addr(i.e. 'host:port') to listen on for client traffic
+    addr = "127.0.0.1:8250"
+
+    # addr(i.e. 'host:port') to advertise to the public
+    advertise-addr = ""
+
+    # a integer value to control expiry date of the binlog data, indicates for how long (in days) the binlog data would be stored.
+    # (default value is 0, means binlog data would never be removed)
+    gc = 7
+
+    # path to the data directory of pump's data
+    data-dir = "data.pump"
+
+    # kafka where pump push binlog to
+    kafka-addrs = "{{ .Values.kafkaAddrs }}"
+
+    # zookeeper addrs, get kafka-addrs from zookeeper if uncomment this
+    zookeeper-addrs = "{{ .Values.zookeeperAddrs }}"
+
+    # number of seconds between heartbeat ticks (in 2 seconds)
+    heartbeat-interval = 2
+
+    # a comma separated list of PD endpoints
+    pd-urls = "http://127.0.0.1:2379"
+
+    # unix socket addr to listen on for client traffic
+    socket = "unix:///var/run/tidb/pump.sock"
+
+  tidb-config: |-
+    # TiDB Configuration.
+
+    # TiDB server host.
+    host = "0.0.0.0"
+
+    # TiDB server port.
+    port = 4000
+
+    # Registered store name, [memory, goleveldb, boltdb, tikv, mocktikv]
+    store = "mocktikv"
+
+    # TiDB storage path.
+    path = "/tmp/tidb"
+
+    # The socket file to use for connection.
+    #socket = ""
+
+    # Socket file to write binlog.
+    # binlog-socket = ""
+
+    # Run ddl worker on this tidb-server.
+    run-ddl = true
+
+    # Schema lease duration, very dangerous to change only if you know what you do.
+    lease = "10s"
+
+    # When create table, split a separated region for it.
+    # split-table = false
+
+    # The limit of concurrent executed sessions.
+    # token-limit = 1000
+
+    [log]
+    # Log level: info, debug, warn, error, fatal.
+    level = "{{ .Values.tidb.logLevel }}"
+
+    # Log format, one of json, text, console.
+    format = "text"
+
+    # Disable automatic timestamps in output
+    disable-timestamp = false
+
+    # Stores slow query log into seperate files.
+    #slow-query-file = ""
+
+    # Queries with execution time greater than this value will be logged. (Milliseconds)
+    slow-threshold = 300
+
+    # Maximum query length recorded in log.
+    query-log-max-len = 2048
+
+    # File logging.
+    [log.file]
+    # Log file name.
+    filename = ""
+
+    # Max log file size in MB.
+    #max-size = 300
+
+    # Max log file keep days.
+    #max-days = 28
+
+    # Maximum number of old log files to retain.
+    #max-backups = 7
+
+    # Rotate log by day
+    log-rotate = true
+
+    [security]
+    # Path of file that contains list of trusted SSL CAs.
+    ssl-ca = ""
+
+    # Path of file that contains X509 certificate in PEM format.
+    ssl-cert = ""
+
+    # Path of file that contains X509 key in PEM format.
+    ssl-key = ""
+
+    [status]
+    # If enable status report HTTP service.
+    report-status = true
+
+    # TiDB status port.
+    status-port = 10080
+
+    # Prometheus pushgateway address, leaves it empty will disable prometheus push.
+    metrics-addr = ""
+
+    # Prometheus client push interval in second, set \"0\" to disable prometheus push.
+    metrics-interval = 15
+
+    [performance]
+    # Set keep alive option for tcp connection.
+    tcp-keep-alive = true
+
+    # The maximum number of retries when commit a transaction.
+    retry-limit = 10
+
+    # The number of goroutines that participate joining.
+    join-concurrency = 5
+
+    # Whether support cartesian product.
+    cross-join = true
+
+    # Stats lease duration, which inflences the time of analyze and stats load.
+    stats-lease = "3s"
+
+    # Run auto analyze worker on this tidb-server.
+    run-auto-analyze = true
+
+    [xprotocol]
+    # Start TiDB x server.
+    xserver = false
+
+    # TiDB x protocol server host.
+    xhost = "0.0.0.0"
+
+    # TiDB x protocol server port.
+    xport = 14000
+
+    # The socket file to use for x protocol connection.
+    xsocket = ""
+
+    [plan-cache]
+    plan-cache-enabled = false
+    plan-cache-capacity = 2560
+    plan-cache-shards = 256
+
+  privileged-tidb-config: |-
+    # TiDB Configuration.
+    # TiDB server host.
+    host = "0.0.0.0"
+    # TiDB server port.
+    port = 4000
+    # Registered store name, [memory, goleveldb, boltdb, tikv, mocktikv]
+    store = "mocktikv"
+    # TiDB storage path.
+    path = "/tmp/tidb"
+    # The socket file to use for connection.
+    #socket = ""
+    # Socket file to write binlog.
+    #binlog-socket = ""
+    # Run ddl worker on this tidb-server.
+    run-ddl = true
+    # Schema lease duration, very dangerous to change only if you know what you do.
+    lease = "10s"
+    # When create table, split a separated region for it.
+    # split-table = false
+    [log]
+    # Log level: info, debug, warn, error, fatal.
+    level = "info"
+    # Log format, one of json, text, console.
+    format = "text"
+    # Disable automatic timestamps in output
+    disable-timestamp = false
+    # Queries with execution time greater than this value will be logged. (Milliseconds)
+    slow-threshold = 300
+    # Maximum query length recorded in log.
+    query-log-max-len = 2048
+    # File logging.
+    [log.file]
+    # Log file name.
+    filename = ""
+    # Max log file size in MB.
+    #max-size = 300
+    # Max log file keep days.
+    #max-days = 28
+    # Maximum number of old log files to retain.
+    #max-backups = 7
+    # Rotate log by day
+    log-rotate = true
+    [security]
+    # This option causes the server to start without using the privilege system at all.
+    skip-grant-table = true
+    # Path of file that contains list of trusted SSL CAs.
+    ssl-ca = ""
+    # Path of file that contains X509 certificate in PEM format.
+    ssl-cert = ""
+    # Path of file that contains X509 key in PEM format.
+    ssl-key = ""
+    [status]
+    # If enable status report HTTP service.
+    report-status = true
+    # TiDB status port.
+    status-port = 10080
+    # Prometheus pushgateway address, leaves it empty will disable prometheus push.
+    # metrics-addr = "{{.MetricsAddr}}"
+    # Prometheus client push interval in second, set \"0\" to disable prometheus push.
+    metrics-interval = 15
+    [performance]
+    # Set keep alive option for tcp connection.
+    tcp-keep-alive = true
+    # The maximum number of retries when commit a transaction.
+    retry-limit = 10
+    # The number of goroutines that participate joining.
+    join-concurrency = 5
+    # Whether support cartesian product.
+    cross-join = true
+    # Stats lease duration, which inflences the time of analyze and stats load.
+    stats-lease = "3s"
+    # Run auto analyze worker on this tidb-server.
+    run-auto-analyze = true
+    [xprotocol]
+    # Start TiDB x server.
+    xserver = false
+    # TiDB x protocol server host.
+    xhost = "0.0.0.0"
+    # TiDB x protocol server port.
+    xport = 14000
+    # The socket file to use for x protocol connection.
+    xsocket = ""
+    [plan-cache]
+    plan-cache-enabled = false
+    plan-cache-capacity = 2560
+    plan-cache-shards = 256
+
+  pd-config: |-
+    # PD Configuration.
+
+    name = "pd"
+    data-dir = "default.pd"
+
+    client-urls = "http://127.0.0.1:2379"
+    # if not set, use ${client-urls}
+    advertise-client-urls = ""
+
+    peer-urls = "http://127.0.0.1:2380"
+    # if not set, use ${peer-urls}
+    advertise-peer-urls = ""
+
+    initial-cluster = ""
+    initial-cluster-state = ""
+
+    lease = 3
+    tso-save-interval = "3s"
+
+    [log]
+    level = "{{ .Values.pd.logLevel }}"
+
+    # log format, one of json, text, console
+    #format = "text"
+
+    # disable automatic timestamps in output
+    #disable-timestamp = false
+
+    # file logging
+    [log.file]
+    #filename = ""
+    # max log file size in MB
+    #max-size = 300
+    # max log file keep days
+    #max-days = 28
+    # maximum number of old log files to retain
+    #max-backups = 7
+    # rotate log by day
+    #log-rotate = true
+
+    [metric]
+    # prometheus client push interval, set "0s" to disable prometheus.
+    interval = "15s"
+    # prometheus pushgateway address, leaves it empty will disable prometheus.
+    address = ""
+
+    [schedule]
+    max-snapshot-count = 3
+    max-store-down-time = "{{ .Values.pd.maxStoreDownTime }}"
+    leader-schedule-limit = 64
+    region-schedule-limit = 16
+    replica-schedule-limit = 24
+
+    # customized schedulers, the format is as below
+    # if empty, it will use balance-leader, balance-region, hot-region as default
+    # [[schedule.schedulers]]
+    # type = "evict-leader"
+    # args = ["1"]
+
+
+    [replication]
+    # The number of replicas for each region.
+    max-replicas = {{ .Values.pd.maxReplicas }}
+    # The label keys specified the location of a store.
+    # The placement priorities is implied by the order of label keys.
+    # For example, ["zone", "rack"] means that we should place replicas to
+    # different zones first, then to different racks if we don't have enough zones.
+    location-labels = ["zone", "rack", "host"]
+
+  tikv-config: |-
+    # TiKV config template
+    #  Human-readable big numbers:
+    #   File size(based on byte): KB, MB, GB, TB, PB
+    #    e.g.: 1_048_576 = "1MB"
+    #   Time(based on ms): ms, s, m, h
+    #    e.g.: 78_000 = "1.3m"
+
+    # log level: trace, debug, info, warn, error, off.
+    log-level = "{{ .Values.tikv.logLevel }}"
+    # file to store log, write to stderr if it's empty.
+    # log-file = ""
+
+    [server]
+    # set listening address.
+    # addr = "127.0.0.1:20160"
+    # set advertise listening address for client communication, if not set, use addr instead.
+    # advertise-addr = ""
+    # notify capacity, 40960 is suitable for about 7000 regions.
+    # notify-capacity = 40960
+    # maximum number of messages can be processed in one tick.
+    # messages-per-tick = 4096
+
+    # size of thread pool for grpc server.
+    # grpc-concurrency = 4
+    # The number of max concurrent streams/requests on a client connection.
+    # grpc-concurrent-stream = 1024
+    # The number of connections with each tikv server to send raft messages.
+    # grpc-raft-conn-num = 10
+    # Amount to read ahead on individual grpc streams.
+    # grpc-stream-initial-window-size = "2MB"
+
+    # size of thread pool for endpoint task, should less than total cpu cores.
+    # end-point-concurrency = 8
+
+    # max count of tasks being handled, new tasks will be rejected.
+    # end-point-max-tasks = 2000
+
+    # stack size of endpoint, complicated tasks may involve very deep recursion.
+    # end-point-stack-size = "10MB"
+
+    # set attributes about this server, e.g. { zone = "us-west-1", disk = "ssd" }.
+    # labels = {}
+
+    [storage]
+    # set the path to rocksdb directory.
+    # data-dir = "/tmp/tikv/store"
+
+    # notify capacity of scheduler's channel
+    # scheduler-notify-capacity = 10240
+
+    # maximum number of messages can be processed in one tick
+    # scheduler-messages-per-tick = 1024
+
+    # the number of slots in scheduler latches, concurrency control for write.
+    # scheduler-concurrency = 102400
+
+    # scheduler's worker pool size, should increase it in heavy write cases,
+    # also should less than total cpu cores.
+    # scheduler-worker-pool-size = 4
+
+    # When the pending write bytes exceeds this threshold,
+    # the "scheduler too busy" error is displayed.
+    # scheduler-pending-write-threshold = "100MB"
+
+    [pd]
+    # pd endpoints
+    # endpoints = []
+
+    [metric]
+    # the Prometheus client push interval. Setting the value to 0s stops Prometheus client from pushing.
+    # interval = "15s"
+    # the Prometheus pushgateway address. Leaving it empty stops Prometheus client from pushing.
+    address = "http://localhost:9091" # empty or http://localhost:9091 to disable or enable tikv push metrics
+    # the Prometheus client push job name. Note: A node id will automatically append, e.g., "tikv_1".
+    # job = "tikv"
+
+    [raftstore]
+    # true (default value) for high reliability, this can prevent data loss when power failure.
+    sync-log = {{ .Values.tikv.syncLog }}
+
+    # set the path to raftdb directory, default value is data-dir/raft
+    # raftdb-path = ""
+
+    # set store capacity, if no set, use disk capacity.
+    # capacity = 0
+
+    # notify capacity, 40960 is suitable for about 7000 regions.
+    # notify-capacity = 40960
+
+    # maximum number of messages can be processed in one tick.
+    # messages-per-tick = 4096
+
+    # Region heartbeat tick interval for reporting to pd.
+    # pd-heartbeat-tick-interval = "60s"
+    # Store heartbeat tick interval for reporting to pd.
+    # pd-store-heartbeat-tick-interval = "10s"
+
+    # When the region's size exceeds region-max-size, we will split the region
+    # into two which the left region's size will be region-split-size or a little
+    # bit smaller.
+    # region-max-size = "144MB"
+    # region-split-size = "96MB"
+    # When region size changes exceeds region-split-check-diff, we should check
+    # whether the region should be split or not.
+    # region-split-check-diff = "6MB"
+
+    # Interval to check region whether need to be split or not.
+    # split-region-check-tick-interval = "10s"
+
+    # When raft entry exceed the max size, reject to propose the entry.
+    # raft-entry-max-size = "8MB"
+
+    # Interval to gc unnecessary raft log.
+    # raft-log-gc-tick-interval = "10s"
+    # A threshold to gc stale raft log, must >= 1.
+    # raft-log-gc-threshold = 50
+    # When entry count exceed this value, gc will be forced trigger.
+    # raft-log-gc-count-limit = 72000
+    # When the approximate size of raft log entries exceed this value, gc will be forced trigger.
+    # It's recommanded to set it to 3/4 of region-split-size.
+    # raft-log-gc-size-limit = "72MB"
+
+    # When a peer hasn't been active for max-peer-down-duration,
+    # we will consider this peer to be down and report it to pd.
+    # max-peer-down-duration = "5m"
+
+    # Interval to check whether start manual compaction for a region,
+    # 0 is the default value, means disable manual compaction.
+    # region-compact-check-interval = "5m"
+    # When delete keys of a region exceeds the size, a compaction will be started.
+    # region-compact-delete-keys-count = 1000000
+    # Interval to check whether should start a manual compaction for lock column family,
+    # if written bytes reach lock-cf-compact-threshold for lock column family, will fire
+    # a manual compaction for lock column family.
+    # lock-cf-compact-interval = "10m"
+    # lock-cf-compact-bytes-threshold = "256MB"
+
+    # Interval (s) to check region whether the data are consistent.
+    # consistency-check-interval = 0
+
+    [rocksdb]
+    # Maximum number of concurrent background jobs (compactions and flushes)
+    # max-background-jobs = 8
+
+    # This value represents the maximum number of threads that will concurrently perform a
+    # compaction job by breaking it into multiple, smaller ones that are run simultaneously.
+    # Default: 1 (i.e. no subcompactions)
+    # max-sub-compactions = 1
+
+    # Number of open files that can be used by the DB.  You may need to
+    # increase this if your database has a large working set. Value -1 means
+    # files opened are always kept open. You can estimate number of files based
+    # on target_file_size_base and target_file_size_multiplier for level-based
+    # compaction.
+    # If max-open-files = -1, RocksDB will prefetch index and filter blocks into
+    # block cache at startup, so if your database has a large working set, it will
+    # take several minutes to open the db.
+    # max-open-files = 40960
+
+    # Max size of rocksdb's MANIFEST file.
+    # For detailed explanation please refer to https://github.com/facebook/rocksdb/wiki/MANIFEST
+    # max-manifest-file-size = "20MB"
+
+    # If true, the database will be created if it is missing.
+    # create-if-missing = true
+
+    # rocksdb wal recovery mode
+    # 0 : TolerateCorruptedTailRecords, tolerate incomplete record in trailing data on all logs;
+    # 1 : AbsoluteConsistency, We don't expect to find any corruption in the WAL;
+    # 2 : PointInTimeRecovery, Recover to point-in-time consistency;
+    # 3 : SkipAnyCorruptedRecords, Recovery after a disaster;
+    # wal-recovery-mode = 2
+
+    # rocksdb write-ahead logs dir path
+    # This specifies the absolute dir path for write-ahead logs (WAL).
+    # If it is empty, the log files will be in the same dir as data.
+    # When you set the path to rocksdb directory in memory like in /dev/shm, you may want to set
+    # wal-dir to a directory on a persistent storage.
+    # See https://github.com/facebook/rocksdb/wiki/How-to-persist-in-memory-RocksDB-database
+    # wal-dir = "/tmp/tikv/store"
+
+    # The following two fields affect how archived write-ahead logs will be deleted.
+    # 1. If both set to 0, logs will be deleted asap and will not get into the archive.
+    # 2. If wal-ttl-seconds is 0 and wal-size-limit is not 0,
+    #    WAL files will be checked every 10 min and if total size is greater
+    #    then wal-size-limit, they will be deleted starting with the
+    #    earliest until size_limit is met. All empty files will be deleted.
+    # 3. If wal-ttl-seconds is not 0 and wal-size-limit is 0, then
+    #    WAL files will be checked every wal-ttl-seconds / 2 and those that
+    #    are older than wal-ttl-seconds will be deleted.
+    # 4. If both are not 0, WAL files will be checked every 10 min and both
+    #    checks will be performed with ttl being first.
+    # When you set the path to rocksdb directory in memory like in /dev/shm, you may want to set
+    # wal-ttl-seconds to a value greater than 0 (like 86400) and backup your db on a regular basis.
+    # See https://github.com/facebook/rocksdb/wiki/How-to-persist-in-memory-RocksDB-database
+    # wal-ttl-seconds = 0
+    # wal-size-limit = 0
+
+    # rocksdb max total wal size
+    # max-total-wal-size = "4GB"
+
+    # rocksdb writable file max buffer size
+    # writable-file-max-buffer-size = "1MB"
+
+    # Rocksdb Statistics provides cumulative stats over time.
+    # Turn statistics on will introduce about 5%-10% overhead for RocksDB,
+    # but it is worthy to know the internal status of RocksDB.
+    # enable-statistics = true
+
+    # Dump statistics periodically in information logs.
+    # Same as rocksdb's default value (10 min).
+    # stats-dump-period = "10m"
+
+    # Due to Rocksdb FAQ: https://github.com/facebook/rocksdb/wiki/RocksDB-FAQ,
+    # If you want to use rocksdb on multi disks or spinning disks, you should set value at
+    # least 2MB;
+    # compaction-readahead-size = 0
+
+    # This is the maximum buffer size that is used by WritableFileWrite
+    # writable-file-max-buffer-size = "1MB"
+
+    # Use O_DIRECT for both reads and writes in background flush and compactions
+    # use-direct-io-for-flush-and-compaction = false
+
+    # Limit the disk IO of compaction and flush. Compaction and flush can cause
+    # terrible spikes if they exceed a certain threshold. Consider setting this to
+    # 50% ~ 80% of the disk throughput for a more stable result. However, in heavy
+    # write workload, limiting compaction and flush speed can cause write stalls too.
+    # rate-bytes-per-sec = 0
+
+    # Enable or disable the pipelined write
+    # enable-pipelined-write = true
+
+    # set backup path, if not set, use "backup" under store path.
+    # backup-dir = "/tmp/tikv/store/backup"
+
+    # Allows OS to incrementally sync WAL to disk while it is being written.
+    # wal-bytes-per-sync = 0
+
+    # Column Family default used to store actual data of the database.
+    [rocksdb.defaultcf]
+    # compression method (if any) is used to compress a block.
+    #   no:     kNoCompression
+    #   snappy: kSnappyCompression
+    #   zlib:   kZlibCompression
+    #   bzip2:  kBZip2Compression
+    #   lz4:    kLZ4Compression
+    #   lz4hc:  kLZ4HCCompression
+    #   zstd:   kZSTD
+
+    # per level compression
+    # compression-per-level = ["no", "no", "lz4", "lz4", "lz4", "zstd", "zstd"]
+
+    # Approximate size of user data packed per block.  Note that the
+    # block size specified here corresponds to uncompressed data.
+    # block-size = "64KB"
+
+    # If you're doing point lookups you definitely want to turn bloom filters on, We use
+    # bloom filters to avoid unnecessary disk reads. Default bits_per_key is 10, which
+    # yields ~1% false positive rate. Larger bits_per_key values will reduce false positive
+    # rate, but increase memory usage and space amplification.
+    # bloom-filter-bits-per-key = 10
+
+    # false means one sst file one bloom filter, true means evry block has a corresponding bloom filter
+    # block-based-bloom-filter = false
+
+    # level0-file-num-compaction-trigger = 4
+
+    # Soft limit on number of level-0 files. We start slowing down writes at this point.
+    # level0-slowdown-writes-trigger = 20
+
+    # Maximum number of level-0 files.  We stop writes at this point.
+    # level0-stop-writes-trigger = 36
+
+    # Amount of data to build up in memory (backed by an unsorted log
+    # on disk) before converting to a sorted on-disk file.
+    # write-buffer-size = "128MB"
+
+    # The maximum number of write buffers that are built up in memory.
+    # max-write-buffer-number = 5
+
+    # The minimum number of write buffers that will be merged together
+    # before writing to storage.
+    # min-write-buffer-number-to-merge = 1
+
+    # Control maximum total data size for base level (level 1).
+    # max-bytes-for-level-base = "512MB"
+
+    # Target file size for compaction.
+    # target-file-size-base = "8MB"
+
+    # Max bytes for compaction.max_compaction_bytes
+    # max-compaction-bytes = "2GB"
+
+    # There are four different algorithms to pick files to compact.
+    # 0 : ByCompensatedSize
+    # 1 : OldestLargestSeqFirst
+    # 2 : OldestSmallestSeqFirst
+    # 3 : MinOverlappingRatio
+    # compaction-pri = 3
+
+    # block-cache used to cache uncompressed blocks, big block-cache can speed up read.
+    # in normal cases should tune to 30%-50% system's total memory.
+    # block-cache-size = "1GB"
+
+    # Indicating if we'd put index/filter blocks to the block cache.
+    # If not specified, each "table reader" object will pre-load index/filter block
+    # during table initialization.
+    # cache-index-and-filter-blocks = true
+
+    # Pin level0 filter and index blocks in cache.
+    # pin-l0-filter-and-index-blocks = true
+
+    # Enable read amplication statistics.
+    # value  =>  memory usage (percentage of loaded blocks memory)
+    # 1      =>  12.50 %
+    # 2      =>  06.25 %
+    # 4      =>  03.12 %
+    # 8      =>  01.56 %
+    # 16     =>  00.78 %
+    # read-amp-bytes-per-bit = 0
+
+    # Options for Column Family write
+    # Column Family write used to store commit informations in MVCC model
+    [rocksdb.writecf]
+    # compression-per-level = ["no", "no", "lz4", "lz4", "lz4", "zstd", "zstd"]
+    # block-size = "64KB"
+    # write-buffer-size = "128MB"
+    # max-write-buffer-number = 5
+    # min-write-buffer-number-to-merge = 1
+    # max-bytes-for-level-base = "512MB"
+    # target-file-size-base = "8MB"
+
+    # in normal cases should tune to 10%-30% system's total memory.
+    # block-cache-size = "256MB"
+    # level0-file-num-compaction-trigger = 4
+    # level0-slowdown-writes-trigger = 20
+    # level0-stop-writes-trigger = 36
+    # cache-index-and-filter-blocks = true
+    # pin-l0-filter-and-index-blocks = true
+    # compaction-pri = 3
+    # read-amp-bytes-per-bit = 0
+
+    [rocksdb.lockcf]
+    # compression-per-level = ["no", "no", "no", "no", "no", "no", "no"]
+    # block-size = "16KB"
+    # write-buffer-size = "128MB"
+    # max-write-buffer-number = 5
+    # min-write-buffer-number-to-merge = 1
+    # max-bytes-for-level-base = "128MB"
+    # target-file-size-base = "8MB"
+    # block-cache-size = "256MB"
+    # level0-file-num-compaction-trigger = 1
+    # level0-slowdown-writes-trigger = 20
+    # level0-stop-writes-trigger = 36
+    # cache-index-and-filter-blocks = true
+    # pin-l0-filter-and-index-blocks = true
+    # compaction-pri = 0
+    # read-amp-bytes-per-bit = 0
+
+    [raftdb]
+    # max-sub-compactions = 1
+    # max-open-files = 40960
+    # max-manifest-file-size = "20MB"
+    # create-if-missing = true
+    # writable-file-max-buffer-size = "1MB"
+
+    # enable-statistics = true
+    # stats-dump-period = "10m"
+
+    # compaction-readahead-size = 0
+    # writable-file-max-buffer-size = "1MB"
+    # use-direct-io-for-flush-and-compaction = false
+    # enable-pipelined-write = true
+    # allow-concurrent-memtable-write = false
+
+    [raftdb.defaultcf]
+    # compression-per-level = ["no", "no", "lz4", "lz4", "lz4", "zstd", "zstd"]
+    # block-size = "64KB"
+    # write-buffer-size = "128MB"
+    # max-write-buffer-number = 5
+    # min-write-buffer-number-to-merge = 1
+    # max-bytes-for-level-base = "512MB"
+    # target-file-size-base = "8MB"
+
+    # should tune to 256MB~2GB.
+    # block-cache-size = "256MB"
+    # level0-file-num-compaction-trigger = 4
+    # level0-slowdown-writes-trigger = 20
+    # level0-stop-writes-trigger = 36
+    # cache-index-and-filter-blocks = true
+    # pin-l0-filter-and-index-blocks = true
+    # compaction-pri = 0
+    # read-amp-bytes-per-bit = 0
+    # wal-bytes-per-sync = 0
+
+  prometheus-config: |-
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    {{- if .Values.alertmanagerURL }}
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - {{ .Values.alertmanagerURL }}
+    {{- end }}
+    scrape_configs:
+      - job_name: 'tidb-cluster'
+        scrape_interval: 15s
+        honor_labels: true
+        kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names:
+            - {{ .Release.Namespace }}
+        tls_config:
+          insecure_skip_verify: true
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_cluster_pingcap_com_tidbCluster]
+          action: keep
+          regex: {{ .Values.clusterName }}
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__meta_kubernetes_pod_container_port_name]
+          action: keep
+          regex: metrics        # only scrape container port named metrics
+        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: kubernetes_node
+        - source_labels: [__meta_kubernetes_pod_ip]
+          action: replace
+          target_label: kubernetes_pod_ip
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: instance
+        - source_labels: [__meta_kubernetes_pod_label_cluster_pingcap_com_tidbCluster]
+          action: replace
+          target_label: cluster
+    rule_files:
+      - 'alert.rules'
+
+  alert-rules-config: |-
+    groups:
+    - name: tidb-alert-rules
+      rules:
+      - alert: PD_cluster_offline_tikv_nums
+        expr: sum ( pd_cluster_status{type="store_down_count"} ) > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: emergency
+          expr:  sum ( pd_cluster_status{type="store_down_count"} ) > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_cluster_offline_tikv_nums
+
+      - alert: PD_etcd_write_disk_latency
+        expr: histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[1m])) by (instance,job,le) ) > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_etcd_write_disk_latency
+
+      - alert: PD_miss_peer_region_count
+        expr: sum( pd_regions_status{type="miss_peer_region_count"} )  > 100
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  sum( pd_regions_status{type="miss_peer_region_count"} )  > 100
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_miss_peer_region_count
+
+      - alert: PD_cluster_lost_connect_tikv_nums
+        expr: sum ( pd_cluster_status{type="store_disconnected_count"} )   > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum ( pd_cluster_status{type="store_disconnected_count"} )   > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_cluster_lost_connect_tikv_nums
+
+      - alert: PD_cluster_low_space
+        expr: sum ( pd_cluster_status{type="store_low_space_count"} )  > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum ( pd_cluster_status{type="store_low_space_count"} )  > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_cluster_low_space
+
+      - alert: PD_etcd_network_peer_latency
+        expr: histogram_quantile(0.99, sum(rate(etcd_network_peer_round_trip_time_seconds_bucket[1m])) by (To,instance,job,le) ) > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  histogram_quantile(0.99, sum(rate(etcd_network_peer_round_trip_time_seconds_bucket[1m])) by (To,instance,job,le) ) > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_etcd_network_peer_latency
+
+      - alert: PD_tidb_handle_requests_duration
+        expr: histogram_quantile(0.99, sum(rate(pd_client_request_handle_requests_duration_seconds_bucket{type="tso"}[1m])) by (instance,job,le) ) > 0.1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  histogram_quantile(0.99, sum(rate(pd_client_request_handle_requests_duration_seconds_bucket{type="tso"}[1m])) by (instance,job,le) ) > 0.1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_tidb_handle_requests_duration
+
+      - alert: PD_down_peer_region_nums
+        expr: sum ( pd_regions_status{type="down_peer_region_count"} ) > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum ( pd_regions_status{type="down_peer_region_count"} ) > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_down_peer_region_nums
+
+      - alert: PD_incorrect_namespace_region_count
+        expr: sum ( pd_regions_status{type="incorrect_namespace_region_count"} ) > 100
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr: sum ( pd_regions_status{type="incorrect_namespace_region_count"} ) > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_incorrect_namespace_region_count
+
+      - alert: PD_pending_peer_region_count
+        expr: sum( pd_regions_status{type="pending_peer_region_count"} )  > 100
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum( pd_regions_status{type="pending_peer_region_count"} )  > 100
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_pending_peer_region_count
+
+      - alert: PD_leader_change
+        expr: count( changes(pd_server_tso{type="save"}[10m]) > 0 )   >= 2
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  count( changes(pd_server_tso{type="save"}[10m]) > 0 )   >= 2
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}   values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: PD_leader_change
+
+      - alert: TiKV_space_used_more_than_80%
+        expr: sum(pd_cluster_status{type="storage_size"}) / sum(pd_cluster_status{type="storage_capacity"}) * 100  > 80
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum(pd_cluster_status{type="storage_size"}) / sum(pd_cluster_status{type="storage_capacity"}) * 100  > 80
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV_space_used_more_than_80%
+      - alert: TiDB_schema_error
+        expr: increase(tidb_session_schema_lease_error_total{type="outdated"}[15m]) > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: emergency
+          expr:  increase(tidb_session_schema_lease_error_total{type="outdated"}[15m]) > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB schema error
+
+      - alert: TiDB_tikvclient_region_err_total
+        expr: increase( tidb_tikvclient_region_err_total[10m] )  > 6000
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: emergency
+          expr:  increase( tidb_tikvclient_region_err_total[10m] )  > 6000
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB tikvclient_backoff_count error
+
+      - alert: TiDB_domain_load_schema_total
+        expr: increase( tidb_domain_load_schema_total{type="failed"}[10m] )  > 10
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: emergency
+          expr:  increase( tidb_domain_load_schema_total{type="failed"}[10m] )  > 10
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB domain_load_schema_total error
+
+      - alert: TiDB_monitor_keep_alive
+        expr: increase(tidb_monitor_keep_alive_total[10m]) < 100
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: emergency
+          expr:  increase(tidb_monitor_keep_alive_total[10m]) < 100
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB monitor_keep_alive error
+
+      - alert: TiDB_server_panic_total
+        expr: increase(tidb_server_panic_total[10m]) > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  increase(tidb_server_panic_total[10m]) > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB server panic total
+
+      - alert: TiDB_memery_abnormal
+        expr: go_memstats_heap_inuse_bytes{job="tidb"} > 1e+10
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr: go_memstats_heap_inuse_bytes{job="tidb"} > 1e+10
+        annotations:
+          description: 'alert: values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB mem heap is over 1GiB
+
+      - alert: TiDB_query_duration
+        expr: histogram_quantile(0.99, sum(rate(tidb_server_handle_query_duration_seconds_bucket[1m])) BY (le, instance)) > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  histogram_quantile(0.99, sum(rate(tidb_server_handle_query_duration_seconds_bucket[1m])) BY (le, instance)) > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB query duration 99th percentile is above 1s
+
+      - alert: TiDB_server_event_error
+        expr: increase(tidb_server_server_event{type=~"server_start|server_hang"}[15m])  > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  increase(tidb_server_server_event{type=~"server_start|server_hang"}[15m])  > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB server event error
+
+      - alert: TiDB_tikvclient_backoff_count
+        expr: increase( tidb_tikvclient_backoff_count[10m] )  > 10
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  increase( tidb_tikvclient_backoff_count[10m] )  > 10
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB tikvclient_backoff_count error
+
+      - alert: TiDB_monitor_time_jump_back_error
+        expr: increase(tidb_monitor_time_jump_back_total[10m])  > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  increase(tidb_monitor_time_jump_back_total[10m])  > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB monitor time_jump_back error
+
+      - alert: TiDB_ddl_waiting_jobs
+        expr: sum(tidb_ddl_waiting_jobs) > 5
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum(tidb_ddl_waiting_jobs) > 5
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }} values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB ddl waiting_jobs too much
+
+      - alert: TiKV_memory_used_too_fast
+        expr: (node_memory_MemAvailable offset 5m) - node_memory_MemAvailable > 5*1024*1024*1024
+        for: 5m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: emergency
+          expr: (node_memory_MemAvailable offset 5m) - node_memory_MemAvailable > 5*1024*1024*1024
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV memory used too fast
+
+      - alert: TiKV_GC_can_not_work
+        expr: sum(increase(tidb_tikvclient_gc_action_result{type="success"}[6h])) < 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: emergency
+          expr: sum(increase(tidb_tikvclient_gc_action_result{type="success"}[6h])) < 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV GC can not work
+
+      - alert: TiKV_server_report_failure_msg_total
+        expr:  sum(rate(tikv_server_report_failure_msg_total{type="unreachable"}[10m])) BY (store_id) > 10
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  sum(rate(tikv_server_report_failure_msg_total{type="unreachable"}[10m])) BY (store_id) > 10
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV server_report_failure_msg_total error
+
+      - alert: TiKV_channel_full_total
+        expr: sum(rate(tikv_channel_full_total[10m])) BY (type, instance) > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  sum(rate(tikv_channel_full_total[10m])) BY (type, instance) > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV channel full
+
+      - alert: TiKV_write_stall
+        expr: delta( tikv_engine_write_stall[10m])  > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  delta( tikv_engine_write_stall[10m])  > 0
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV write stall
+
+      - alert: TiKV_raft_log_lag
+        expr: histogram_quantile(0.99, sum(rate(tikv_raftstore_log_lag_bucket[1m])) by (le, instance, job))  > 5000
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  histogram_quantile(0.99, sum(rate(tikv_raftstore_log_lag_bucket[1m])) by (le, instance, job))  > 5000
+        annotations:
+          description: 'alert: instance {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV raftstore log lag more than 5000
+
+      - alert: TiKV_async_request_snapshot_duration_seconds
+        expr: histogram_quantile(0.99, sum(rate(tikv_storage_engine_async_request_duration_seconds_bucket{type="snapshot"}[1m])) by (le, instance, job,type)) > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  histogram_quantile(0.99, sum(rate(tikv_storage_engine_async_request_duration_seconds_bucket{type="snapshot"}[1m])) by (le, instance, job,type)) > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV async request snapshot duration seconds more than 1s
+
+      - alert: TiKV_async_request_write_duration_seconds
+        expr: histogram_quantile(0.99, sum(rate(tikv_storage_engine_async_request_duration_seconds_bucket{type="write"}[1m])) by (le, instance, job,type)) > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  histogram_quantile(0.99, sum(rate(tikv_storage_engine_async_request_duration_seconds_bucket{type="write"}[1m])) by (le, instance, job,type)) > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV async request write duration seconds more than 1s
+
+      - alert: TiKV_coprocessor_request_wait_seconds
+        expr: histogram_quantile(0.9999, sum(rate(tikv_coprocessor_request_wait_seconds_bucket[1m])) by (le, instance, job,req)) > 10
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  histogram_quantile(0.9999, sum(rate(tikv_coprocessor_request_wait_seconds_bucket[1m])) by (le, instance, job,req)) > 10
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV coprocessor request wait seconds more than 10s
+
+      - alert: TiKV_raftstore_thread_cpu_seconds_total
+        expr: sum(rate(tikv_thread_cpu_seconds_total{name=~"raftstore_.*"}[1m])) by (job, name)  > 0.8
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr: sum(rate(tikv_thread_cpu_seconds_total{name=~"raftstore_.*"}[1m])) by (job, name)  > 0.8
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV raftstore thread CPU seconds is high
+
+      - alert: TiKV_raft_append_log_duration_secs
+        expr: histogram_quantile(0.99, sum(rate(tikv_raftstore_append_log_duration_seconds_bucket[1m])) by (le, instance, job)) > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr: histogram_quantile(0.99, sum(rate(tikv_raftstore_append_log_duration_seconds_bucket[1m])) by (le, instance, job)) > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV_raft_append_log_duration_secs
+
+      - alert: TiKV_raft_apply_log_duration_secs
+        expr: histogram_quantile(0.99, sum(rate(tikv_raftstore_apply_log_duration_seconds_bucket[1m])) by (le, instance, job)) > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr: histogram_quantile(0.99, sum(rate(tikv_raftstore_apply_log_duration_seconds_bucket[1m])) by (le, instance, job)) > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV_raft_apply_log_duration_secs
+
+      - alert: TiKV_scheduler_latch_wait_duration_seconds
+        expr: histogram_quantile(0.99, sum(rate(tikv_scheduler_latch_wait_duration_seconds_bucket[1m])) by (le, instance, job,type))  > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  histogram_quantile(0.99, sum(rate(tikv_scheduler_latch_wait_duration_seconds_bucket[1m])) by (le, instance, job,type))  > 1
+        annotations:
+          description: 'alert: instance:
+            {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV scheduler latch wait duration seconds more than 1s
+
+      - alert: TiKV_thread_apply_worker_cpu_seconds
+        expr: sum(rate(tikv_thread_cpu_seconds_total{name="apply_worker"}[1m])) by (job) > 0.9
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr:  sum(rate(tikv_thread_cpu_seconds_total{name="apply_worker"}[1m])) by (job) > 0.9
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV thread apply worker cpu seconds is high
+
+      - alert: TiDB_tikvclient_gc_action_fail
+        expr: sum(increase(tidb_tikvclient_gc_action_result{type="fail"}[1m])) > 10
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: critical
+          expr: sum(increase(tidb_tikvclient_gc_action_result{type="fail"}[1m])) > 10
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiDB_tikvclient_gc_action_fail
+
+      - alert: TiKV_leader_drops
+        expr: delta(tikv_pd_heartbeat_tick_total{type="leader"}[30s]) < -10
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr: delta(tikv_pd_heartbeat_tick_total{type="leader"}[30s]) < -10
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV leader drops
+
+      - alert: TiKV_raft_process_ready_duration_secs
+        expr: histogram_quantile(0.999, sum(rate(tikv_raftstore_raft_process_duration_secs_bucket{type='ready'}[1m])) by (le, instance, job,type)) > 2
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr: histogram_quantile(0.999, sum(rate(tikv_raftstore_raft_process_duration_secs_bucket{type='ready'}[1m])) by (le, instance, job,type)) > 2
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV_raft_process_ready_duration_secs
+
+      - alert: TiKV_raft_process_tick_duration_secs
+        expr: histogram_quantile(0.999, sum(rate(tikv_raftstore_raft_process_duration_secs_bucket{type='tick'}[1m])) by (le, instance, job,type)) > 2
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr: histogram_quantile(0.999, sum(rate(tikv_raftstore_raft_process_duration_secs_bucket{type='tick'}[1m])) by (le, instance, job,type)) > 2
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values:{{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV_raft_process_tick_duration_secs
+
+      - alert: TiKV_scheduler_context_total
+        expr: abs(delta( tikv_scheduler_contex_total[5m])) > 1000
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  abs(delta( tikv_scheduler_contex_total[5m])) > 1000
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV scheduler context total
+
+      - alert: TiKV_scheduler_command_duration_seconds
+        expr: histogram_quantile(0.99, sum(rate(tikv_scheduler_command_duration_seconds_bucket[1m])) by (le, instance, job,type)  / 1000)  > 1
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  histogram_quantile(0.99, sum(rate(tikv_scheduler_command_duration_seconds_bucket[1m])) by (le, instance, job,type)  / 1000)  > 1
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV scheduler command duration seconds more than 1s
+
+      - alert: TiKV_thread_storage_scheduler_cpu_seconds
+        expr: sum(rate(tikv_thread_cpu_seconds_total{name=~"storage_schedul.*"}[1m])) by (job) > 0.8
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum(rate(tikv_thread_cpu_seconds_total{name=~"storage_schedul.*"}[1m])) by (job) > 0.8
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV storage scheduler cpu seconds more than 80%
+
+      - alert: TiKV_coprocessor_outdated_request_wait_seconds
+        expr: delta( tikv_coprocessor_outdated_request_wait_seconds_count[10m] )  > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  delta( tikv_coprocessor_outdated_request_wait_seconds_count[10m] )  > 0
+        annotations:
+          description: 'alert: instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV coprocessor outdated request wait seconds
+
+      - alert: TiKV_coprocessor_request_error
+        expr: increase(tikv_coprocessor_request_error[10m]) > 100
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  increase(tikv_coprocessor_request_error[10m]) > 100
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV coprocessor_request_error
+
+      - alert: TiKV_coprocessor_pending_request
+        expr: delta( tikv_coprocessor_pending_request[10m]) > 5000
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  delta( tikv_coprocessor_pending_request[10m]) > 5000
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV pending {{ .Values.metaType }} request is high
+
+      - alert: TiKV_batch_request_snapshot_nums
+        expr: sum(rate(tikv_thread_cpu_seconds_total{name=~"cop_.*"}[1m])) by (job) / ( count(tikv_thread_cpu_seconds_total{name=~"cop_.*"}) *  0.9 ) / count(count(tikv_thread_cpu_seconds_total) by (instance)) > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum(rate(tikv_thread_cpu_seconds_total{name=~"cop_.*"}[1m])) by (job) / ( count(tikv_thread_cpu_seconds_total{name=~"cop_.*"}) *  0.9 ) / count(count(tikv_thread_cpu_seconds_total) by (instance)) > 0
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV batch request snapshot nums is high
+
+      - alert: TiKV_pending_task
+        expr: sum(tikv_worker_pending_task_total) BY (job,instance,name)  > 1000
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  sum(tikv_worker_pending_task_total) BY (job,instance,name)  > 1000
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV pending task too much
+
+      - alert: TiKV_low_space_and_add_region
+        expr: count( (sum(tikv_store_size_bytes{type="available"}) by (job) / sum(tikv_store_size_bytes{type="capacity"}) by (job) < 0.2) and (sum(tikv_raftstore_snapshot_traffic_total{type="applying"}) by (job) > 0 ) ) > 0
+        for: 1m
+        labels:
+          env: '{{ .Values.clusterName }}'
+          level: warning
+          expr:  count( (sum(tikv_store_size_bytes{type="available"}) by (job) / sum(tikv_store_size_bytes{type="capacity"}) by (job) < 0.2) and (sum(tikv_raftstore_snapshot_traffic_total{type="applying"}) by (job) > 0 ) ) > 0
+        annotations:
+          description: 'alert: type: {{ .Values.metaType }} instance: {{ .Values.metaInstance }}  values: {{ .Values.metaValue }}'
+          value: '{{ .Values.metaValue }}'
+          summary: TiKV low_space and add_region
+
+  grafana-config: |-
+    ##################### Grafana Configuration Example #####################
+    #
+    # Everything has defaults so you only need to uncomment things you want to
+    # change
+
+    # possible values : production, development
+    ; app_mode = production
+
+    # instance name, defaults to HOSTNAME environment variable value or hostname if HOSTNAME var is empty
+    ; instance_name = ${HOSTNAME}
+
+    #################################### Paths ####################################
+    [paths]
+    # Path to where grafana can store temp files, sessions, and the sqlite3 db (if that is used)
+    #
+    ;data = /var/lib/grafana
+    #
+    # Directory where grafana can store logs
+    #
+    ;logs = /var/log/grafana
+    #
+    # Directory where grafana will automatically scan and look for plugins
+    #
+    ;plugins = /var/lib/grafana/plugins
+
+    #
+    #################################### Server ####################################
+    [server]
+    # Protocol (http or https)
+    ;protocol = http
+
+    # The ip address to bind to, empty will bind to all interfaces
+    ;http_addr =
+
+    # The http port  to use
+    ;http_port = 3000
+
+    # The public facing domain name used to access grafana from a browser
+    ;domain = localhost
+
+    # Redirect to correct domain if host header does not match domain
+    # Prevents DNS rebinding attacks
+    ;enforce_domain = false
+
+    # The full public facing url you use in browser, used for redirects and emails
+    # If you use reverse proxy and sub path specify full url (with sub path)
+    root_url = {{ .Values.grafanaUrl }}
+
+    # Log web requests
+    ;router_logging = false
+
+    # the path relative working path
+    ;static_root_path = public
+
+    # enable gzip
+    ;enable_gzip = false
+
+    # https certs & key file
+    ;cert_file =
+    ;cert_key =
+
+    #################################### Database ####################################
+    [database]
+    # You can configure the database connection by specifying type, host, name, user and password
+    # as seperate properties or as on string using the url propertie.
+
+    # Either "mysql", "postgres" or "sqlite3", it's your choice
+    ;type = sqlite3
+    ;host = 127.0.0.1:3306
+    ;name = grafana
+    ;user = root
+    # If the password contains # or ; you have to wrap it with trippel quotes. Ex """#password;"""
+    ;password =
+
+    # Use either URL or the previous fields to configure the database
+    # Example: mysql://user:secret@host:port/database
+    ;url =
+
+    # For "postgres" only, either "disable", "require" or "verify-full"
+    ;ssl_mode = disable
+
+    # For "sqlite3" only, path relative to data_path setting
+    ;path = grafana.db
+
+    # Max conn setting default is 0 (mean not set)
+    ;max_conn =
+    ;max_idle_conn =
+    ;max_open_conn =
+
+
+    #################################### Session ####################################
+    [session]
+    # Either "memory", "file", "redis", "mysql", "postgres", default is "file"
+    ;provider = file
+
+    # Provider config options
+    # memory: not have any config yet
+    # file: session dir path, is relative to grafana data_path
+    # redis: config like redis server e.g. `addr=127.0.0.1:6379,pool_size=100,db=grafana`
+    # mysql: go-sql-driver/mysql dsn config string, e.g. `user:password@tcp(127.0.0.1:3306)/database_name`
+    # postgres: user=a password=b host=localhost port=5432 dbname=c sslmode=disable
+    ;provider_config = sessions
+
+    # Session cookie name
+    ;cookie_name = grafana_sess
+
+    # If you use session in https only, default is false
+    ;cookie_secure = false
+
+    # Session life time, default is 86400
+    ;session_life_time = 86400
+
+    #################################### Data proxy ###########################
+    [dataproxy]
+
+    # This enables data proxy logging, default is false
+    ;logging = false
+
+
+    #################################### Analytics ####################################
+    [analytics]
+    # Server reporting, sends usage counters to stats.grafana.org every 24 hours.
+    # No ip addresses are being tracked, only simple counters to track
+    # running instances, dashboard and error counts. It is very helpful to us.
+    # Change this option to false to disable reporting.
+    ;reporting_enabled = true
+
+    # Set to false to disable all checks to https://grafana.net
+    # for new vesions (grafana itself and plugins), check is used
+    # in some UI views to notify that grafana or plugin update exists
+    # This option does not cause any auto updates, nor send any information
+    # only a GET request to http://grafana.net to get latest versions
+    ;check_for_updates = true
+
+    # Google Analytics universal tracking code, only enabled if you specify an id here
+    ;google_analytics_ua_id =
+
+    #################################### Security ####################################
+    [security]
+    # default admin user, created on startup
+    admin_user = {{ .Values.secrets.grafanaUsername }}
+
+    # default admin password, can be changed before first start of grafana,  or in profile settings
+    admin_password = {{ .Values.secrets.grafanaPassword }}
+
+    # used for signing
+    ;secret_key = SW2YcwTIb9zpOOhoPsMm
+
+    # Auto-login remember days
+    ;login_remember_days = 7
+    ;cookie_username = grafana_user
+    ;cookie_remember_name = grafana_remember
+
+    # disable gravatar profile images
+    ;disable_gravatar = false
+
+    # data source proxy whitelist (ip_or_domain:port separated by spaces)
+    ;data_source_proxy_whitelist =
+
+    [snapshots]
+    # snapshot sharing options
+    ;external_enabled = true
+    ;external_snapshot_url = https://snapshots-origin.raintank.io
+    ;external_snapshot_name = Publish to snapshot.raintank.io
+
+    # remove expired snapshot
+    ;snapshot_remove_expired = true
+
+    # remove snapshots after 90 days
+    ;snapshot_TTL_days = 90
+
+    #################################### Users ####################################
+    [users]
+    # disable user signup / registration
+    ;allow_sign_up = true
+
+    # Allow non admin users to create organizations
+    ;allow_org_create = true
+
+    # Set to true to automatically assign new users to the default organization (id 1)
+    ;auto_assign_org = true
+
+    # Default role new users will be automatically assigned (if disabled above is set to true)
+    ;auto_assign_org_role = Viewer
+
+    # Background text for the user field on the login page
+    ;login_hint = email or username
+
+    # Default UI theme ("dark" or "light")
+    ;default_theme = dark
+
+    [auth]
+    # Set to true to disable (hide) the login form, useful if you use OAuth, defaults to false
+    ;disable_login_form = false
+
+    #################################### Anonymous Auth ##########################
+    [auth.anonymous]
+    # enable anonymous access
+    ;enabled = false
+
+    # specify organization name that should be used for unauthenticated users
+    ;org_name = Main Org.
+
+    # specify role for unauthenticated users
+    ;org_role = Viewer
+
+    #################################### Github Auth ##########################
+    [auth.github]
+    ;enabled = false
+    ;allow_sign_up = true
+    ;client_id = some_id
+    ;client_secret = some_secret
+    ;scopes = user:email,read:org
+    ;auth_url = https://github.com/login/oauth/authorize
+    ;token_url = https://github.com/login/oauth/access_token
+    ;api_url = https://api.github.com/user
+    ;team_ids =
+    ;allowed_organizations =
+
+    #################################### Google Auth ##########################
+    [auth.google]
+    ;enabled = false
+    ;allow_sign_up = true
+    ;client_id = some_client_id
+    ;client_secret = some_client_secret
+    ;scopes = https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email
+    ;auth_url = https://accounts.google.com/o/oauth2/auth
+    ;token_url = https://accounts.google.com/o/oauth2/token
+    ;api_url = https://www.googleapis.com/oauth2/v1/userinfo
+    ;allowed_domains =
+
+    #################################### Generic OAuth ##########################
+    [auth.generic_oauth]
+    ;enabled = false
+    ;name = OAuth
+    ;allow_sign_up = true
+    ;client_id = some_id
+    ;client_secret = some_secret
+    ;scopes = user:email,read:org
+    ;auth_url = https://foo.bar/login/oauth/authorize
+    ;token_url = https://foo.bar/login/oauth/access_token
+    ;api_url = https://foo.bar/user
+    ;team_ids =
+    ;allowed_organizations =
+
+    #################################### Grafana.net Auth ####################
+    [auth.grafananet]
+    ;enabled = false
+    ;allow_sign_up = true
+    ;client_id = some_id
+    ;client_secret = some_secret
+    ;scopes = user:email
+    ;allowed_organizations =
+
+    #################################### Auth Proxy ##########################
+    [auth.proxy]
+    ;enabled = false
+    ;header_name = X-WEBAUTH-USER
+    ;header_property = username
+    ;auto_sign_up = true
+    ;ldap_sync_ttl = 60
+    ;whitelist = 192.168.1.1, 192.168.2.1
+
+    #################################### Basic Auth ##########################
+    [auth.basic]
+    ;enabled = true
+
+    #################################### Auth LDAP ##########################
+    [auth.ldap]
+    ;enabled = false
+    ;config_file = /etc/grafana/ldap.toml
+    ;allow_sign_up = true
+
+    #################################### SMTP / Emailing ##########################
+    [smtp]
+    ;enabled = false
+    ;host = localhost:25
+    ;user =
+    # If the password contains # or ; you have to wrap it with trippel quotes. Ex """#password;"""
+    ;password =
+    ;cert_file =
+    ;key_file =
+    ;skip_verify = false
+    ;from_address = admin@grafana.localhost
+    ;from_name = Grafana
+
+    [emails]
+    ;welcome_email_on_sign_up = false
+
+    #################################### Logging ##########################
+    [log]
+    # Either "console", "file", "syslog". Default is console and  file
+    # Use space to separate multiple modes, e.g. "console file"
+    ;mode = console file
+
+    # Either "trace", "debug", "info", "warn", "error", "critical", default is "info"
+    ;level = info
+
+    # optional settings to set different levels for specific loggers. Ex filters = sqlstore:debug
+    ;filters =
+
+
+    # For "console" mode only
+    [log.console]
+    ;level =
+
+    # log line format, valid options are text, console and json
+    ;format = console
+
+    # For "file" mode only
+    [log.file]
+    ;level =
+
+    # log line format, valid options are text, console and json
+    ;format = text
+
+    # This enables automated log rotate(switch of following options), default is true
+    ;log_rotate = true
+
+    # Max line number of single file, default is 1000000
+    ;max_lines = 1000000
+
+    # Max size shift of single file, default is 28 means 1 << 28, 256MB
+    ;max_size_shift = 28
+
+    # Segment log daily, default is true
+    ;daily_rotate = true
+
+    # Expired days of log file(delete after max days), default is 7
+    ;max_days = 7
+
+    [log.syslog]
+    ;level =
+
+    # log line format, valid options are text, console and json
+    ;format = text
+
+    # Syslog network type and address. This can be udp, tcp, or unix. If left blank, the default unix endpoints will be used.
+    ;network =
+    ;address =
+
+    # Syslog facility. user, daemon and local0 through local7 are valid.
+    ;facility =
+
+    # Syslog tag. By default, the process' argv[0] is used.
+    ;tag =
+
+
+    #################################### AMQP Event Publisher ##########################
+    [event_publisher]
+    ;enabled = false
+    ;rabbitmq_url = amqp://localhost/
+    ;exchange = grafana_events
+
+    ;#################################### Dashboard JSON files ##########################
+    [dashboards.json]
+    ;enabled = false
+    ;path = /var/lib/grafana/dashboards
+
+    #################################### Alerting ############################
+    [alerting]
+    # Disable alerting engine & UI features
+    ;enabled = true
+    # Makes it possible to turn off alert rule execution but alerting UI is visible
+    ;execute_alerts = true
+
+    #################################### Internal Grafana Metrics ##########################
+    # Metrics available at HTTP API Url /api/metrics
+    [metrics]
+    # Disable / Enable internal metrics
+    ;enabled           = true
+
+    # Publish interval
+    ;interval_seconds  = 10
+
+    # Send internal metrics to Graphite
+    [metrics.graphite]
+    # Enable by setting the address setting (ex localhost:2003)
+    ;address =
+    ;prefix = prod.grafana.%(instance_name)s.
+
+    #################################### Internal Grafana Metrics ##########################
+    # Url used to to import dashboards directly from Grafana.net
+    [grafana_net]
+    ;url = https://grafana.net
+
+    #################################### External image storage ##########################
+    [external_image_storage]
+    # Used for uploading images to public servers so they can be included in slack/email messages.
+    # you can choose between (s3, webdav)
+    ;provider =
+
+    [external_image_storage.s3]
+    ;bucket_url =
+    ;access_key =
+    ;secret_key =
+
+    [external_image_storage.webdav]
+    ;url =
+    ;username =
+    ;password =

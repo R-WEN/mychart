@@ -1,0 +1,5 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+  name: pingcap-volume-provisioner
+provisioner: pingcap.com/volume-provisioner

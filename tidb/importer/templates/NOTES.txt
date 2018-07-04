@@ -1,0 +1,2 @@
+Please ensure tidb-lightning and tikv-importer are running succefully
+$ kubectl get po -n {{ .Release.Namespace }} {{ .Values.importer.name }}

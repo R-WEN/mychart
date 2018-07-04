@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.name }}
+data:
+  drainer.toml: |-
+    # Drainer configuration
+
+    # the address that Drainer provides service ("192.168.0.10:8249")
+    addr = "0.0.0.0:8249"
+
+    # the interval of detecting Pump's status from PD (default 10, unit: second)
+    detect-interval = 10
+
+    # the path of storing Drainer data (default "data.drainer")
+    data-dir = "/var/lib/drainer/data"
+
+    # the ZooKeeper address; you can use this option to get the Kafka address from ZooKeeper; if the namespace is configured in Kafka, you need to keep the same configuration here
+    zookeeper-addrs = "{{ .Values.zkAddrs }}"
+
+    # the node address of the PD cluster
+    pd-urls = "{{ .Values.pdUrls }}"
+
+    # the path of the log file
+    log-file = ""
+
+    # Syncer configuration.
+    [syncer]
+
+    # the DB filtering list (default "INFORMATION_SCHEMA,PERFORMANCE_SCHEMA,mysql,test")
+    # does not support the rename DDL operation on the table of ignore schemas
+    ignore-schemas = "INFORMATION_SCHEMA,PERFORMANCE_SCHEMA,mysql"
+
+    # the number of SQL statements in a single transaction that is output to the downstream database (default 1)
+    txn-batch = {{ .Values.txnBatch }}
+
+    # to synchronize the downstream concurrency number, and a bigger value means better throughput performance (default 1)
+    worker-count = {{ .Values.workerCount }}
+
+    # whether to disable dispatching sqls in a single binlog;
+    # if you set the value to true, it is restored into a single transaction to synchronize in the order of each binlog (If the downstream service type is "mysql", set the value to false)
+    disable-dispatch = false
+
+    # the downstream service type of Drainer (default "mysql")
+    # valid values: "mysql", "pb"
+    {{- if .Values.mysql }}
+    db-type = "mysql"
+    {{- else }}
+    db-type = "pb"
+    {{- end }}
+
+    # replicate-do-db priority over replicate-do-table if have same db name
+    # and we support regex expression,
+    # the regex expression starts with '~'
+
+    # replicate-do-db = ["~^b.*","s1"]
+
+    # [[syncer.replicate-do-table]]
+    # db-name ="test"
+    # tbl-name = "log"
+
+    # [[syncer.replicate-do-table]]
+    # db-name ="test"
+    # tbl-name = "~^a.*"
+
+    # server parameters of the downstream database when the db-type is set to "mysql"
+    [syncer.to]
+    {{- if .Values.mysql }}
+    host = "{{ .Values.mysql.host }}"
+    user = "{{ .Values.mysql.user }}"
+    password = "{{ .Values.mysql.password }}"
+    port = {{ .Values.mysql.port }}
+    {{- else }}
+    # the directory of the binlog file when the db-type is set to "pb"
+    dir = "/var/lib/drainer/data"
+    {{- end }}

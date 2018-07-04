@@ -1,0 +1,61 @@
+{{- $defaultPushgatewayImage := "prom/pushgateway:v0.3.1" -}}
+apiVersion: pingcap.com/v1
+kind: TidbCluster
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.clusterName }}
+  annotations:
+    pushgateway-image: {{ .Values.pushgatewayImage | default $defaultPushgatewayImage }}
+spec:
+  pd:
+    size: {{ .Values.pd.size }}
+    image: {{ .Values.pd.image }}
+  {{- if .Values.pd.resources }}
+{{ toYaml .Values.pd.resources | indent 4 }}
+  {{- end }}
+  {{- if .Values.pd.nodeSelector }}
+    nodeSelector:
+{{ toYaml .Values.pd.nodeSelector | indent 6 }}
+  {{- end }}
+    nodeSelectorRequired: {{ .Values.nodeSelectorRequired }}
+  tidb:
+  {{- if .Values.tidb.binlog }}
+    binlog:
+      image: {{ .Values.tidb.binlog.image }}
+    {{- if .Values.tidb.binlog.resources }}
+{{ toYaml .Values.tidb.binlog.resources | indent 6 }}
+    {{- end }}
+  {{- end }}
+    size: {{ .Values.tidb.size }}
+    image: {{ .Values.tidb.image }}
+  {{- if .Values.tidb.resources }}
+{{ toYaml .Values.tidb.resources | indent 4 }}
+  {{- end }}
+  {{- if .Values.tidb.nodeSelector }}
+    nodeSelector:
+{{ toYaml .Values.tidb.nodeSelector | indent 6 }}
+  {{- end }}
+    nodeSelectorRequired: {{ .Values.nodeSelectorRequired }}
+  tikv:
+    size: {{ .Values.tikv.size }}
+    image: {{ .Values.tikv.image }}
+  {{- if .Values.tikv.resources }}
+{{ toYaml .Values.tikv.resources | indent 4 }}
+  {{- end }}
+  {{- if .Values.tikv.nodeSelector }}
+    nodeSelector:
+{{ toYaml .Values.tikv.nodeSelector | indent 6 }}
+  {{- end }}
+    nodeSelectorRequired: {{ .Values.nodeSelectorRequired }}
+{{- if .Values.monitor }}
+  monitor:
+{{ toYaml .Values.monitor | indent 4 }}
+{{- end }}
+{{- if .Values.privilegedTidb }}
+  privilegedTidb:
+    size: {{ .Values.privilegedTidb.size }}
+    image: {{ .Values.privilegedTidb.image }}
+{{- end }}
+  services:
+{{ toYaml .Values.services | indent 4 }}
+  configMap: {{ .Values.configMap }}

@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.lightning.name }}
+data:
+  tidb-lightning.toml: |-
+    ### tidb-lightning configuration
+    [lightning]
+
+    # background profile for debugging ( 0 to disable )
+    pprof-port = 10089
+
+    # number of workers to restore tables (default to `runtime.NumCPU()`).
+    # worker-pool-size =
+
+    # logging
+    level = "debug"
+    file = ""
+    max-size = 128 # MB
+    max-days = 28
+    max-backups = 14
+
+    [tikv-importer]
+    addr = "{{ .Values.importer.name }}.{{ .Release.Namespace }}:{{ .Values.importer.servicePort }}"
+    # size of batch to import kv data into TiKV: xxx (GB)
+    batch-size = 500 # GB
+
+    [mydumper]
+    # block size of file reading
+    read-block-size = 4096 # Byte (default = 4 KB)
+    # split source data file into multiple region/chunk to execute restoring in parallel
+    region-min-size = 268435456 # Byte (default = 256 MB)
+    # mydumper local source data directory
+    data-source-dir = "/var/lib/lightning/data"
+    # if no-schema is set true, lightning will get schema information from tidb-server directly without creating them.
+    no-schema = false
+
+    # configuration for tidb(pick one of them if has many tidb servers) and pd server.
+    [tidb]
+    host = "{{ .Values.tidb.mysql.host }}"
+    port = {{ .Values.tidb.mysql.port }}
+    user = "{{ .Values.tidb.mysql.user }}"
+    password = "{{ .Values.tidb.mysql.password }}"
+    status-port = 10080
+    # PD Server of target cluster
+    pd-addr = "{{ .Values.tidb.pdAddr }}"
+    # Uncomment the following line if you want to set sql-mode. You can set it to empty string or any valid sql-mode value supported by tidb
+    # sql-mode = ""
+    # lightning uses some code of tidb(used as library), and the flag controls it's log level.
+    log-level = "error"
+    # set tidb session variable to speed up checksum/analyze table.
+    distsql-scan-concurrency = 16
+
+    # post-restore provide some options which will be executed after all kv data has been imported into the tikv cluster.
+    # the execution order are(if set true): compact > checksum > analyze
+    [post-restore]
+    # if set true, compact will do compaction to tikv data.
+    compact = true
+    # if set true, checksum will do ADMIN CHECKSUM TABLE <table> for each table.
+    checksum = true
+    # if set true, analyze will do ANALYZE TABLE <table> for each table.
+    analyze = true

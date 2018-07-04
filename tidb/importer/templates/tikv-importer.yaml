@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.importer.name }}
+  labels:
+    app: {{ .Values.importer.name }}
+spec:
+  nodeName: {{ .Values.importer.nodeName }}
+  containers:
+  - command:
+    - /bin/tikv-importer
+    - -C
+    - /etc/tikv-importer.toml
+    image: {{ .Values.importer.image }}
+    name: {{ .Values.importer.name }}
+    resources:
+{{ toYaml .Values.importer.resources | indent 6 }}
+    volumeMounts:
+      - name: timezone
+        mountPath: /etc/localtime
+      - name: config
+        mountPath: /etc
+      - name: importer
+        mountPath: /var/lib/importer/data
+  restartPolicy: Never
+  volumes:
+  - name: timezone
+    hostPath:
+      path: /etc/localtime
+  - name: config
+    configMap:
+      name: {{ .Values.importer.name }}
+  - name: importer
+    hostPath:
+      path: {{ .Values.importer.hostPath }}
+

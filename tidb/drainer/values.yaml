@@ -1,0 +1,48 @@
+# Default values for drainer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+name: tidb-drainer
+
+# drainer pods count, default: 1
+replicas: 1
+
+# the k8s node name of the drainer pod
+nodeName: kube-node-1
+image: pingcap/tidb-binlog:latest
+
+# drainer pod's resources
+resources:
+  limits:
+    cpu: 16000m
+    memory: 24Gi
+  requests:
+    cpu: 8000m
+    memory: 16Gi
+
+# the ZooKeeper address
+zkAddrs: zookeeper-urls
+# the PD urls
+pdUrls: pd-urls
+
+# the number of SQL statements in a single transaction that is output to the downstream database (default 1)
+txnBatch: 10
+
+# to synchronize the downstream concurrency number, and a bigger value means better throughput performance (default 1)
+workerCount: 20
+
+# please see here to get the commitTS:
+# https://github.com/pingcap/tidb-tools/blob/master/generate_binlog_position/README.md
+# https://download.pingcap.org/generate_binlog_position-latest-linux-amd64.tar.gz
+commitTS: 0
+
+# downstream mysql config
+mysql:
+  host: localhost
+  port: 4000
+  user: root
+  password:
+
+# the directory of the binlog file on the host when the db-type is set to "pb"
+pb: {}
+  # hostPath: /mnt/drainer

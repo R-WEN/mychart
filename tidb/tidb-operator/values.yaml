@@ -1,0 +1,91 @@
+# Default values for tidb-operator
+rbac:
+  create: true
+
+# operatorImage is tidb-operator image
+# it is used in tidb-controller-manager, tidb-scheduler, tidb-volume-manager
+operatorImage: pingcap/tidb-operator:v1.2.0
+
+controllerManager:
+  replicas: 1
+  logLevel: debug
+  # can be Cluster, Local
+  serviceExternalTrafficPolicy: Cluster
+  resources:
+    limits:
+      cpu: 250m
+      memory: 150Mi
+    requests:
+      cpu: 80m
+      memory: 50Mi
+
+scheduler:
+  replicas: 1
+  logLevel: debug
+  resources:
+    limits:
+      cpu: 250m
+      memory: 150M
+    requests:
+      cpu: 80m
+      memory: 50M
+
+kubeScheduler:
+  # kubeSchedulerImage and hyperkubeImage is used for sidecar container of tidb-scheduler
+  # only one of them is required
+  kubeSchedulerImage:
+  hyperkubeImage: quay.io/coreos/hyperkube:v1.7.2_coreos.0
+  # logLevel is numbered log level
+  logLevel: 2
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512M
+    requests:
+      cpu: 80m
+      memory: 170M
+
+volumeManager:
+  pvDir: /tidb
+  # logLevel is numbered log level
+  logLevel: 2
+  resources:
+    limits:
+      cpu: 250m
+      memory: 150Mi
+    requests:
+      cpu: 80m
+      memory: 50Mi
+
+# volumes is for tidb-volume configmap,
+# name is kube node name
+# each node can have multiple directories used for local PV
+# path must have prefix volumeManager.pvDir
+volumes:
+  - name: kube-node-1
+    directories:
+    - path: /tidb/tikv-dir-1
+      size: 50Gi
+    - path: /tidb/pd-dir-1
+      size: 20Gi
+  - name: kube-node-2
+    directories:
+    - path: /tidb/pd-dir-1
+      size: 20Gi
+    - path: /tidb/tikv-dir-1
+      size: 50Gi
+  - name: kube-node-3
+    directories:
+    - path: /tidb/pd-dir-1
+      size: 20Gi
+    - path: /tidb/tikv-dir-2
+      size: 50Gi
+
+# Operator will delete PV that can deleted auto when testMode is true, should only use it in test env.
+testMode: false
+
+# Operator controllers's resync duration
+resyncDuration: 30s
+
+# Enabled review or not, default: false
+reviewEnabled: false

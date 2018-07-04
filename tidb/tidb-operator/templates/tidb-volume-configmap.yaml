@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: tidb-volume
+  labels:
+    app: tidb-operator
+data:
+  volume: |-
+    nodes:
+{{ toYaml .Values.volumes | indent 6 }}
