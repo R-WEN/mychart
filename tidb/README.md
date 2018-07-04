@@ -1,4 +1,4 @@
-Fork From [`pingcap`](http://download.pingcap.org/tidb-operator-charts-latest.tar.gz)
+Fork from [`pingcap`](http://download.pingcap.org/tidb-operator-charts-latest.tar.gz)
 
 ***
 
