@@ -1,3 +1,7 @@
+Fork From [`pingcap`] (http://download.pingcap.org/tidb-operator-charts-latest.tar.gz)
+
+***
+
 This is the chart package for Helm
 
 ## Requirements
