@@ -1,0 +1,171 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: tikv1
+  namespace: tidb
+  labels:
+    deployment: tikv1
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: tikv1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deployment: tikv1
+    spec: 
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: tikv
+        image: pingcap/tikv:v2.0.4
+        args:
+          - "--addr=0.0.0.0:20160"
+          - "--advertise-addr=tikv1:20160"
+          - "--data-dir=/data/tikv1"
+          - "--pd=http://pd0:2380,pd1=http://pd1:2380,pd2=http://pd2:2380"
+        imagePullPolicy: Always
+        workingDir: /data/
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "4Gi"
+            cpu: "4"        
+        securityContext:
+          privileged: true 
+        volumeMounts: 
+          - name: localtime
+            mountPath: /etc/localtime
+            readOnly: true
+          - name: cgroup
+            mountPath: /sys/fs/cgroup
+            readOnly: true     
+          - name: datadir
+            mountPath: /data   
+      volumes: 
+      - name: localtime
+        hostPath: 
+          path: /etc/localtime
+      - name: cgroup
+        hostPath: 
+          path: /sys/fs/cgroup 
+      - name: datadir
+        hostPath: 
+          path: /data/dockerData/tikv1
+
+
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: pd2
+  namespace: tidb
+  labels:
+    deployment: pd2
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: pd2
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deployment: pd2
+    spec: 
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: pd2
+        image: pingcap/pd:latest
+        args:
+          - "--name=pd2"
+          - "--client-urls=http://0.0.0.0:2379"
+          - "--peer-urls=http://0.0.0.0:2380"
+          - "--advertise-client-urls=http://pd2:2379"
+          - "--advertise-peer-urls=http://pd2:2380"
+          - "--initial-cluster=pd0=http://pd0:2380,pd1=http://pd1:2380,pd2=http://pd2:2380"
+          - "--data-dir=/data/pd"
+        imagePullPolicy: Always
+        workingDir: /data/
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "4Gi"
+            cpu: "4"        
+        securityContext:
+          privileged: true 
+        volumeMounts: 
+          - name: localtime
+            mountPath: /etc/localtime
+            readOnly: true
+          - name: cgroup
+            mountPath: /sys/fs/cgroup
+            readOnly: true     
+          - name: datadir
+            mountPath: /data   
+      volumes: 
+      - name: localtime
+        hostPath: 
+          path: /etc/localtime
+      - name: cgroup
+        hostPath: 
+          path: /sys/fs/cgroup 
+      - name: datadir
+        hostPath: 
+          path: /data/dockerData/pd2
+
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: tidb-server
+  namespace: tidb
+  labels:
+    deployment:  tidb-server
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment:  tidb-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        deployment: tidb-server
+    spec: 
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: tidb
+        image: pingcap/tidb:latest
+        args:
+          - "--store=tikv"
+          - "--path=http://pd0:2380,pd1=http://pd1:2380,pd2=http://pd2:2380"
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
